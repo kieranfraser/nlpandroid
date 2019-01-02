@@ -4,17 +4,13 @@ import android.content.Context
 import android.util.Log
 import com.aempathy.NLPAndroid.interfaces.RetrofitService
 import com.aempathy.NLPAndroid.models.TopicRequest
+import com.aempathy.NLPAndroid.models.TopicResponse
 import com.aempathy.NLPAndroid.utils.RetrofitFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import com.aempathy.NLPAndroid.utils.StateUtils
 import retrofit2.HttpException
 
 
-class TopicClassifier(mContext: Context){
+class TopicClassifier(mContext: Context, mLocalOnly: Boolean){
 
     private val TAG = "NLPAndroid: "+TopicClassifier::class.java.simpleName
 
@@ -28,23 +24,37 @@ class TopicClassifier(mContext: Context){
         "Shopping", "Sports", "Travel")
 
     private val context = mContext
-    private val service: RetrofitService
+    private val localOnly = mLocalOnly
+    private val service: RetrofitService?
 
     init {
-        service = RetrofitFactory.makeRetrofitService()
+        if(!mLocalOnly) {
+            service = RetrofitFactory.makeRetrofitService()
+        }
+        else{
+            service = null
+        }
     }
 
+    /**
+     * Send request to Empushy-NLP server for classification of text topic
+     * - if localOnly, local model used (less intelligent)
+     * - if no network, 'unknown' returned
+     */
     suspend fun classifyTopic(text: String): String {
         var topic = "unknown"
-        val request = service.getTopic(TopicRequest("This is my ultra cool smartphone."))
-        try {
-            val response = request.await()
-            topic = response.body()?:"unknown"
-            Log.d(TAG, topic)
-        } catch (e: HttpException) {
-            Log.d(TAG, ""+e.code())
-        } catch (e: Throwable) {
-            Log.d(TAG, "Ooops: Something else went wrong")
+        if(!localOnly) {
+            if(StateUtils.isNetworkAvailable(context)) {
+                try {
+                    val request = service?.getTopic(TopicRequest(text))
+                    val response = request?.await()
+                    topic = (response?.body() as TopicResponse).inference
+                } catch (e: HttpException) {
+                    Log.d(TAG, "" + e.code())
+                } catch (e: Throwable) {
+                    Log.d(TAG, "Ooops: Something else went wrong: " + e.message)
+                }
+            }
         }
         return topic
     }
