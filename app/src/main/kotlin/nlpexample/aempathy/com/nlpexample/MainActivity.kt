@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         for(e in nerResult){
             Toast.makeText(applicationContext,
-                e.value+":"+e.type,
+                e.entity+":"+e.type,
                 Toast.LENGTH_LONG).show()
         }
     }
