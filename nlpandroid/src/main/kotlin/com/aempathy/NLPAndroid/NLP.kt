@@ -94,4 +94,27 @@ class NLP(mContext: Context, mLocalOnly: Boolean){
         }
         return ArrayList(entities)
     }
+
+    /**
+     * Send request to Empushy-NLP server for classification of sentiment
+     * - if localOnly, local model used (less intelligent)
+     * - if no network, -1 returned
+     */
+    suspend fun classifySentiment(text: String): Double {
+        var sentiment = -1.0
+        if(!localOnly) {
+            if(StateUtils.isNetworkAvailable(context)) {
+                try {
+                    val request = service?.getSentiment(SentimentRequest(text))
+                    val response = request?.await()
+                    sentiment = (response?.body() as SentimentResponse).inference
+                } catch (e: HttpException) {
+                    Log.d(TAG, "" + e.code())
+                } catch (e: Throwable) {
+                    Log.d(TAG, "Ooops: Something else went wrong: " + e.message)
+                }
+            }
+        }
+        return sentiment
+    }
 }

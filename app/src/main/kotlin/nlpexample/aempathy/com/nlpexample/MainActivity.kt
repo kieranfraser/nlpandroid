@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nlp:NLP
     var result = "No result yet"
     var nerResult = mutableListOf<Entity>()
+    var sentimentResult = -1.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +45,21 @@ class MainActivity : AppCompatActivity() {
         /* Toast illustrating result */
         Toast.makeText(applicationContext,
             result,
+            Toast.LENGTH_LONG).show()
+
+        /*
+        * Using kotlin Coroutine, infer sentiment
+        */
+        runBlocking {
+            launch (Dispatchers.Default) {
+                val gResult = async { nlp.classifySentiment("I love lasagne so much.") }
+                sentimentResult = gResult.await()
+            }
+        }
+
+        /* Toast illustrating result */
+        Toast.makeText(applicationContext,
+            "Sentiment: "+sentimentResult,
             Toast.LENGTH_LONG).show()
 
         /*
