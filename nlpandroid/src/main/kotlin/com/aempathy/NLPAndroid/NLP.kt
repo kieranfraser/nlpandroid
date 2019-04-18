@@ -10,6 +10,9 @@ import retrofit2.HttpException
 import android.graphics.ColorSpace.Model
 import android.R.attr.data
 import com.aempathy.NLPAndroid.models.*
+import info.debatty.java.stringsimilarity.JaroWinkler
+
+
 
 
 class NLP(mContext: Context, mLocalOnly: Boolean){
@@ -116,5 +119,15 @@ class NLP(mContext: Context, mLocalOnly: Boolean){
             }
         }
         return sentiment
+    }
+
+    fun matchEntityToContacts(personEntity:String, contactNames:List<String>, threshold: Double): MutableList<String> {
+        val jw = JaroWinkler()
+        val matchedContacts = mutableListOf<String>()
+        for(contactName in contactNames){
+            if(jw.similarity(personEntity, contactName) > threshold)
+                matchedContacts.add(contactName)
+        }
+        return matchedContacts
     }
 }
