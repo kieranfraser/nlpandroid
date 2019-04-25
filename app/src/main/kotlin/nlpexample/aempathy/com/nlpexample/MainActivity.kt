@@ -77,5 +77,16 @@ class MainActivity : AppCompatActivity() {
                 e.entity+":"+e.type,
                 Toast.LENGTH_LONG).show()
         }
+
+        val entityExtracted = "Kieran"
+        val contactList = mutableListOf<String>()
+        contactList.add("Kieran Fraser")
+        contactList.add("John Doe")
+        contactList.add("Kevin Hart")
+
+        val matchedList = nlp.matchEntityToContacts(entityExtracted, contactList, 0.85)
+        for(person in matchedList){
+            Toast.makeText(applicationContext, person, Toast.LENGTH_SHORT).show()
+        }
     }
 }
