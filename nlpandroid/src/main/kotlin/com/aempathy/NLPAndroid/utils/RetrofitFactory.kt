@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 object RetrofitFactory {
-    const val BASE_URL = "https://empushy-nlp.azurewebsites.net"
+    const val BASE_URL = "https://empushy.azurewebsites.net"
 
     fun makeRetrofitService(): RetrofitService {
 
